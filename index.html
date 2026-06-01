@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대만 반도체 월매출 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0f1117;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+.header {
+  background: linear-gradient(135deg, #1a1d2e, #252940);
+  padding: 20px 32px;
+  border-bottom: 1px solid #2a2d3e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header h1 { font-size: 20px; font-weight: 600; color: #fff; }
+.header .meta { font-size: 13px; color: #888; }
+.controls {
+  display: flex;
+  gap: 12px;
+  padding: 16px 32px;
+  background: #13151f;
+  border-bottom: 1px solid #1e2030;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.controls label { font-size: 13px; color: #999; margin-right: 4px; }
+select, .btn {
+  background: #1e2030;
+  color: #e0e0e0;
+  border: 1px solid #2a2d3e;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+select:hover, .btn:hover { border-color: #4a5080; }
+select option { background: #1e2030; }
+optgroup { color: #6b7fff; font-style: normal; }
+.btn-primary { background: #4a5aff; border-color: #4a5aff; color: #fff; }
+.btn-primary:hover { background: #3a4aee; }
+.btn-danger { background: #dc2626; border-color: #dc2626; color: #fff; font-size: 11px; padding: 6px 10px; }
+.btn-danger:hover { background: #b91c1c; }
+.unit-toggle { display: flex; gap: 0; }
+.unit-toggle .btn { border-radius: 0; padding: 8px 14px; }
+.unit-toggle .btn:first-child { border-radius: 6px 0 0 6px; }
+.unit-toggle .btn:last-child { border-radius: 0 6px 6px 0; }
+.unit-toggle .btn.active { background: #4a5aff; border-color: #4a5aff; color: #fff; }
+.main {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: calc(100vh - 120px);
+}
+.sidebar {
+  background: #13151f;
+  border-right: 1px solid #1e2030;
+  padding: 16px 0;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
+}
+.sidebar .cat-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px 6px;
+}
+.sidebar .company-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  color: #b0b0b0;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sidebar .company-btn:hover { background: #1e2030; color: #fff; }
+.sidebar .company-btn.active { background: #252940; color: #6b7fff; font-weight: 600; border-left: 3px solid #6b7fff; }
+.sidebar .company-btn .code { color: #666; font-size: 11px; margin-left: 4px; }
+.content { padding: 24px 32px; overflow-y: auto; max-height: calc(100vh - 120px); }
+.chart-container {
+  background: #1a1d2e;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #252940;
+}
+.chart-container h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+.chart-wrapper { position: relative; height: 400px; }
+.table-container {
+  background: #1a1d2e;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #252940;
+  overflow-x: auto;
+}
+.table-container h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 10px 14px; text-align: right; border-bottom: 1px solid #252940; white-space: nowrap; }
+th { color: #888; font-weight: 600; font-size: 12px; text-transform: uppercase; position: sticky; top: 0; background: #1a1d2e; }
+td:first-child, th:first-child { text-align: left; }
+tr:hover td { background: #1e2030; }
+.yoy-pos { color: #4ade80; }
+.yoy-neg { color: #f87171; }
+.yoy-zero { color: #888; }
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.summary-card {
+  background: #1a1d2e;
+  border-radius: 10px;
+  padding: 16px 20px;
+  border: 1px solid #252940;
+}
+.summary-card .label { font-size: 12px; color: #888; margin-bottom: 4px; }
+.summary-card .value { font-size: 22px; font-weight: 700; color: #fff; }
+.summary-card .sub { font-size: 12px; margin-top: 4px; }
+
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,17,23,0.95);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.3s;
+}
+.loading-overlay.hidden { opacity: 0; pointer-events: none; }
+.loading-bar-bg {
+  width: 320px; height: 6px;
+  background: #1e2030; border-radius: 3px;
+  overflow: hidden; margin-top: 16px;
+}
+.loading-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #4a5aff, #6b7fff);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.loading-text { color: #888; font-size: 14px; margin-top: 10px; }
+.loading-title { color: #fff; font-size: 18px; font-weight: 600; }
+
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { max-height: none; display: flex; overflow-x: auto; padding: 8px; gap: 0; }
+  .sidebar .cat-title { display: none; }
+  .sidebar .company-btn { white-space: nowrap; padding: 6px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-title">대만 반도체 월매출 대시보드</div>
+  <div class="loading-bar-bg"><div class="loading-bar" id="loadingBar"></div></div>
+  <div class="loading-text" id="loadingText">데이터 로딩 중...</div>
+</div>
+
+<div class="header">
+  <div>
+    <h1>대만 반도체 월매출 대시보드</h1>
+    <div class="meta" id="lastUpdated"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="btn" onclick="refreshData()">새로고침</button>
+    <button class="btn btn-danger" onclick="clearCache()">캐시 삭제</button>
+  </div>
+</div>
+
+<div class="controls">
+  <label>단위:</label>
+  <div class="unit-toggle">
+    <button class="btn active" data-unit="billion" onclick="setUnit('billion')">억원 (NTD)</button>
+    <button class="btn" data-unit="thousand" onclick="setUnit('thousand')">천원 (NTD)</button>
+  </div>
+  <label style="margin-left:16px;">연도 범위:</label>
+  <select id="yearFrom"></select>
+  <span style="color:#666;">~</span>
+  <select id="yearTo"></select>
+  <button class="btn" onclick="applyYearFilter()" style="margin-left:4px;">적용</button>
+</div>
+
+<div class="main">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="content" id="content">
+    <div style="text-align:center;padding:80px 20px;color:#666;font-size:15px;">
+      좌측에서 기업을 선택하세요
+    </div>
+  </div>
+</div>
+
+<script>
+const FINMIND_URL = 'https://api.finmindtrade.com/api/v4/data';
+const CACHE_KEY = 'tw_revenue_cache';
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+
+const CATEGORIES = {
+  "메모리": [
+    {code:"2408",name:"Nanya Tech"},{code:"2344",name:"Winbond"},{code:"2337",name:"Macronix"},
+  ],
+  "비메모리": [
+    {code:"2454",name:"MediaTek"},{code:"3034",name:"Novatek"},{code:"2379",name:"Realtek"},
+  ],
+  "파운드리": [
+    {code:"2330",name:"TSMC"},{code:"2303",name:"UMC"},{code:"5347",name:"VIS"},
+  ],
+  "후공정(OSAT)": [
+    {code:"3711",name:"ASE Tech"},{code:"6147",name:"Chipbond"},{code:"6239",name:"PTI"},
+    {code:"8150",name:"ChipMOS"},{code:"2449",name:"KYEC"},
+  ],
+  "반도체 유통": [
+    {code:"3260",name:"Adata"},{code:"2451",name:"Transcend"},{code:"8299",name:"Phison"},
+  ],
+  "Apple Vendor": [
+    {code:"2317",name:"Hon Hai"},{code:"4938",name:"Pegatron"},{code:"3008",name:"Largan"},
+    {code:"3406",name:"Genius"},{code:"2474",name:"Catcher"},
+  ],
+  "서버": [
+    {code:"5274",name:"Aspeed"},{code:"4919",name:"Nuvoton"},{code:"2382",name:"Quanta"},
+    {code:"6669",name:"Wiwynn"},{code:"2356",name:"Inventec"},{code:"3515",name:"ASRock"},
+    {code:"3231",name:"Wistron"},
+  ],
+  "PC": [
+    {code:"2353",name:"Acer"},{code:"2357",name:"Asustek"},{code:"2376",name:"Gigabyte"},
+    {code:"2324",name:"Compal"},
+  ],
+  "PCB": [
+    {code:"3037",name:"Unimicron"},{code:"8046",name:"Nanya PCB"},{code:"3189",name:"Kinsus"},
+  ],
+  "EV(패키징)": [
+    {code:"6121",name:"Simplo"},{code:"3211",name:"Dynapack"},
+  ],
+  "LCD 패널": [
+    {code:"2409",name:"AUO"},{code:"3481",name:"Innolux"},{code:"6116",name:"Hannstar"},
+  ],
+  "MLCC": [
+    {code:"2327",name:"Yageo"},{code:"2492",name:"Walsin"},
+  ],
+};
+
+let DATA = null;
+let currentCode = null;
+let unit = 'billion';
+let revenueChart = null;
+let yoyChart = null;
+let yearRange = null;
+
+const YEAR_COLORS = [
+  '#6b7fff','#4ade80','#f59e0b','#f87171','#a78bfa',
+  '#38bdf8','#fb923c','#e879f9','#34d399','#fbbf24',
+];
+
+function getAllCompanies() {
+  const list = [];
+  for (const [cat, comps] of Object.entries(CATEGORIES)) {
+    for (const c of comps) list.push({...c, category: cat});
+  }
+  return list;
+}
+
+async function fetchCompany(code) {
+  const now = new Date();
+  const start = `${now.getFullYear() - 5}-01-01`;
+  const end = `${now.getFullYear()}-12-31`;
+  const params = new URLSearchParams({
+    dataset: 'TaiwanStockMonthRevenue',
+    data_id: code,
+    start_date: start,
+    end_date: end,
+  });
+  const r = await fetch(`${FINMIND_URL}?${params}`);
+  const json = await r.json();
+  if (json.status === 200 && json.data) return json.data;
+  return [];
+}
+
+function transformRecords(records) {
+  const result = {};
+  for (const rec of records) {
+    const y = String(rec.revenue_year);
+    const m = String(rec.revenue_month);
+    const rev = Math.floor(rec.revenue / 1000); // NTD -> 千NTD
+    if (!result[y]) result[y] = {};
+    result[y][m] = rev;
+  }
+  return result;
+}
+
+function loadCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (Date.now() - cached.timestamp > CACHE_TTL) return null;
+    return cached.data;
+  } catch { return null; }
+}
+
+function saveCache(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({timestamp: Date.now(), data}));
+  } catch {}
+}
+
+function clearCache() {
+  localStorage.removeItem(CACHE_KEY);
+  location.reload();
+}
+
+async function refreshData() {
+  localStorage.removeItem(CACHE_KEY);
+  await loadAllData(true);
+}
+
+async function loadAllData(force = false) {
+  const overlay = document.getElementById('loadingOverlay');
+  const bar = document.getElementById('loadingBar');
+  const text = document.getElementById('loadingText');
+  overlay.classList.remove('hidden');
+
+  if (!force) {
+    const cached = loadCache();
+    if (cached) {
+      DATA = cached;
+      overlay.classList.add('hidden');
+      onDataLoaded();
+      return;
+    }
+  }
+
+  const companies = getAllCompanies();
+  const total = companies.length;
+  const result = {};
+  const yearsSet = new Set();
+  const batchSize = 5;
+
+  for (let i = 0; i < total; i += batchSize) {
+    const batch = companies.slice(i, i + batchSize);
+    const promises = batch.map(async (comp) => {
+      try {
+        const records = await fetchCompany(comp.code);
+        const revenue = transformRecords(records);
+        Object.keys(revenue).forEach(y => yearsSet.add(parseInt(y)));
+        return {code: comp.code, name: comp.name, category: comp.category, revenue};
+      } catch {
+        return {code: comp.code, name: comp.name, category: comp.category, revenue: {}};
+      }
+    });
+    const results = await Promise.all(promises);
+    for (const r of results) result[r.code] = {name: r.name, category: r.category, revenue: r.revenue};
+    const done = Math.min(i + batchSize, total);
+    bar.style.width = (done / total * 100) + '%';
+    text.textContent = `${done} / ${total} 기업 로딩 완료`;
+  }
+
+  const years = [...yearsSet].sort();
+  DATA = {
+    last_updated: new Date().toISOString(),
+    years,
+    companies: result,
+    categories: Object.fromEntries(Object.entries(CATEGORIES).map(([k,v]) => [k, v.map(c=>c.code)])),
+  };
+
+  saveCache(DATA);
+  overlay.classList.add('hidden');
+  onDataLoaded();
+}
+
+function formatRevenue(val) {
+  if (val == null) return '-';
+  if (unit === 'billion') return (val / 100000).toFixed(1);
+  return val.toLocaleString();
+}
+function formatRevenueLabel() {
+  return unit === 'billion' ? '억 NTD' : '천 NTD';
+}
+function setUnit(u) {
+  unit = u;
+  document.querySelectorAll('.unit-toggle .btn').forEach(b => b.classList.toggle('active', b.dataset.unit === u));
+  if (currentCode) renderCompany(currentCode);
+}
+
+function onDataLoaded() {
+  const ts = DATA.last_updated || '';
+  document.getElementById('lastUpdated').textContent = '마지막 업데이트: ' + ts.slice(0,16).replace('T',' ');
+  const years = DATA.years || [];
+  yearRange = [Math.min(...years), Math.max(...years)];
+  const fromSel = document.getElementById('yearFrom');
+  const toSel = document.getElementById('yearTo');
+  fromSel.innerHTML = '';
+  toSel.innerHTML = '';
+  years.forEach(y => { fromSel.add(new Option(y,y)); toSel.add(new Option(y,y)); });
+  fromSel.value = yearRange[0];
+  toSel.value = yearRange[1];
+  renderSidebar();
+  selectCompany(Object.keys(DATA.companies)[0]);
+}
+
+function applyYearFilter() {
+  yearRange = [parseInt(document.getElementById('yearFrom').value), parseInt(document.getElementById('yearTo').value)];
+  if (yearRange[0] > yearRange[1]) yearRange.reverse();
+  if (currentCode) renderCompany(currentCode);
+}
+
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = '';
+  for (const [cat, codes] of Object.entries(DATA.categories)) {
+    const title = document.createElement('div');
+    title.className = 'cat-title';
+    title.textContent = cat;
+    sidebar.appendChild(title);
+    for (const code of codes) {
+      const comp = DATA.companies[code];
+      if (!comp) continue;
+      const btn = document.createElement('button');
+      btn.className = 'company-btn';
+      btn.dataset.code = code;
+      btn.innerHTML = `${comp.name} <span class="code">${code}</span>`;
+      btn.onclick = () => selectCompany(code);
+      sidebar.appendChild(btn);
+    }
+  }
+}
+
+function selectCompany(code) {
+  currentCode = code;
+  document.querySelectorAll('.company-btn').forEach(b => b.classList.toggle('active', b.dataset.code === code));
+  renderCompany(code);
+}
+
+function getYears(comp) {
+  const all = Object.keys(comp.revenue || {}).map(Number).sort();
+  if (!yearRange) return all;
+  return all.filter(y => y >= yearRange[0] && y <= yearRange[1]);
+}
+
+function renderCompany(code) {
+  const comp = DATA.companies[code];
+  if (!comp) return;
+  const content = document.getElementById('content');
+  const years = getYears(comp);
+  const months = Array.from({length:12},(_,i)=>i+1);
+
+  let latestYear = years[years.length-1];
+  let prevYear = years.length > 1 ? years[years.length-2] : null;
+  let latestData = comp.revenue[latestYear] || {};
+  let prevData = prevYear ? (comp.revenue[prevYear] || {}) : {};
+  let latestTotal = Object.values(latestData).reduce((a,b)=>a+b,0);
+  let lastMonth = Object.keys(latestData).length > 0 ? Math.max(...Object.keys(latestData).map(Number)) : 0;
+  let lastMonthRev = latestData[lastMonth] || 0;
+  let lastMonthPrev = prevData[lastMonth] || 0;
+  let lastMonthYoY = lastMonthPrev ? ((lastMonthRev/lastMonthPrev-1)*100) : null;
+  let ytdYoY = null;
+  if (prevYear && lastMonth > 0) {
+    let prevYtd = 0;
+    for (let m=1;m<=lastMonth;m++) prevYtd += (prevData[m]||0);
+    if (prevYtd > 0) ytdYoY = ((latestTotal/prevYtd-1)*100);
+  }
+
+  content.innerHTML = `
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="label">최신월 매출 (${latestYear}/${lastMonth}월)</div>
+        <div class="value">${formatRevenue(lastMonthRev)}</div>
+        <div class="sub ${lastMonthYoY>0?'yoy-pos':lastMonthYoY<0?'yoy-neg':'yoy-zero'}">
+          YoY ${lastMonthYoY!=null?(lastMonthYoY>0?'+':'')+lastMonthYoY.toFixed(1)+'%':'N/A'}
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="label">${latestYear} YTD (1~${lastMonth}월)</div>
+        <div class="value">${formatRevenue(latestTotal)}</div>
+        <div class="sub ${ytdYoY>0?'yoy-pos':ytdYoY<0?'yoy-neg':'yoy-zero'}">
+          YTD YoY ${ytdYoY!=null?(ytdYoY>0?'+':'')+ytdYoY.toFixed(1)+'%':'N/A'}
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="label">카테고리</div>
+        <div class="value" style="font-size:16px;">${comp.category}</div>
+        <div class="sub" style="color:#666;">${comp.name} (${code})</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">데이터 범위</div>
+        <div class="value" style="font-size:16px;">${years[0]||'-'} ~ ${years[years.length-1]||'-'}</div>
+        <div class="sub" style="color:#666;">${years.length}년간 데이터</div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <h2>월별 매출 추이 (${formatRevenueLabel()})</h2>
+      <div class="chart-wrapper"><canvas id="revenueChart"></canvas></div>
+    </div>
+    <div class="chart-container">
+      <h2>YoY 변화율 (%)</h2>
+      <div class="chart-wrapper"><canvas id="yoyChart"></canvas></div>
+    </div>
+    <div class="table-container">
+      <h2>월별 매출 상세 (${formatRevenueLabel()})</h2>
+      <table id="revenueTable"></table>
+    </div>
+    <div class="table-container">
+      <h2>YoY 변화율 상세 (%)</h2>
+      <table id="yoyTable"></table>
+    </div>`;
+
+  renderRevenueChart(comp,years,months);
+  renderYoYChart(comp,years,months);
+  renderRevenueTable(comp,years,months);
+  renderYoYTable(comp,years,months);
+}
+
+function renderRevenueChart(comp,years,months) {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  if (revenueChart) revenueChart.destroy();
+  const datasets = years.map((year,i) => {
+    const data = months.map(m => {
+      const val = comp.revenue[year]?.[m];
+      if (val==null) return null;
+      return unit==='billion' ? val/100000 : val;
+    });
+    const isLatest = i===years.length-1;
+    return {
+      label: String(year), data,
+      borderColor: YEAR_COLORS[i%YEAR_COLORS.length],
+      backgroundColor: YEAR_COLORS[i%YEAR_COLORS.length]+'20',
+      borderWidth: isLatest?3:1.5, pointRadius: isLatest?4:2, tension: 0.3, spanGaps: false,
+    };
+  });
+  revenueChart = new Chart(ctx, {
+    type:'line',
+    data: {labels: months.map(m=>m+'월'), datasets},
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins: {
+        legend:{labels:{color:'#aaa',padding:16}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y.toLocaleString(undefined,{maximumFractionDigits:1}):'-'} ${formatRevenueLabel()}`}}
+      },
+      scales: {
+        x:{ticks:{color:'#888'},grid:{color:'#1e2030'}},
+        y:{ticks:{color:'#888',callback:v=>v.toLocaleString()},grid:{color:'#1e2030'},title:{display:true,text:formatRevenueLabel(),color:'#888'}},
+      },
+    },
+  });
+}
+
+function renderYoYChart(comp,years,months) {
+  const ctx = document.getElementById('yoyChart').getContext('2d');
+  if (yoyChart) yoyChart.destroy();
+  const yoyYears = years.filter((_,i)=>i>0);
+  const datasets = yoyYears.map((year,i) => {
+    const prevYear = year-1;
+    const data = months.map(m => {
+      const cur = comp.revenue[year]?.[m];
+      const prev = comp.revenue[prevYear]?.[m];
+      if (cur==null||prev==null||prev===0) return null;
+      return ((cur/prev-1)*100);
+    });
+    const isLatest = i===yoyYears.length-1;
+    return {
+      label:`${year} YoY`, data,
+      borderColor: YEAR_COLORS[(i+1)%YEAR_COLORS.length],
+      borderWidth: isLatest?3:1.5, pointRadius: isLatest?4:2, tension: 0.3, spanGaps: false,
+    };
+  });
+  yoyChart = new Chart(ctx, {
+    type:'line',
+    data: {labels: months.map(m=>m+'월'), datasets},
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins: {
+        legend:{labels:{color:'#aaa',padding:16}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y.toFixed(1)+'%':'-'}`}},
+      },
+      scales: {
+        x:{ticks:{color:'#888'},grid:{color:'#1e2030'}},
+        y:{ticks:{color:'#888',callback:v=>v+'%'},grid:{color:'#1e2030'},title:{display:true,text:'YoY %',color:'#888'}},
+      },
+    },
+  });
+}
+
+function renderRevenueTable(comp,years,months) {
+  const table = document.getElementById('revenueTable');
+  let h = '<thead><tr><th>월</th>';
+  years.forEach(y => h+=`<th>${y}</th>`);
+  h += '</tr></thead><tbody>';
+  months.forEach(m => {
+    h += `<tr><td><strong>${m}월</strong></td>`;
+    years.forEach(y => { h+=`<td>${formatRevenue(comp.revenue[y]?.[m])}</td>`; });
+    h += '</tr>';
+  });
+  h += '<tr style="border-top:2px solid #3a3d50;font-weight:700;"><td>합계</td>';
+  years.forEach(y => {
+    const t = months.reduce((s,m)=>s+(comp.revenue[y]?.[m]||0),0);
+    h += `<td>${t>0?formatRevenue(t):'-'}</td>`;
+  });
+  h += '</tr></tbody>';
+  table.innerHTML = h;
+}
+
+function renderYoYTable(comp,years,months) {
+  const table = document.getElementById('yoyTable');
+  const yoyYears = years.filter((_,i)=>i>0);
+  let h = '<thead><tr><th>월</th>';
+  yoyYears.forEach(y => h+=`<th>${y} vs ${y-1}</th>`);
+  h += '</tr></thead><tbody>';
+  months.forEach(m => {
+    h += `<tr><td><strong>${m}월</strong></td>`;
+    yoyYears.forEach(y => {
+      const cur = comp.revenue[y]?.[m], prev = comp.revenue[y-1]?.[m];
+      if (cur==null||prev==null||prev===0) { h+='<td class="yoy-zero">-</td>'; }
+      else {
+        const yoy = ((cur/prev-1)*100);
+        const cls = yoy>0?'yoy-pos':yoy<0?'yoy-neg':'yoy-zero';
+        h += `<td class="${cls}">${yoy>0?'+':''}${yoy.toFixed(1)}%</td>`;
+      }
+    });
+    h += '</tr>';
+  });
+  h += '<tr style="border-top:2px solid #3a3d50;font-weight:700;"><td>YTD</td>';
+  yoyYears.forEach(y => {
+    const curMonths = Object.keys(comp.revenue[y]||{}).map(Number);
+    const lastM = curMonths.length>0 ? Math.max(...curMonths) : 0;
+    let curYtd=0, prevYtd=0;
+    for (let m=1;m<=lastM;m++) { curYtd+=(comp.revenue[y]?.[m]||0); prevYtd+=(comp.revenue[y-1]?.[m]||0); }
+    if (prevYtd===0) { h+='<td class="yoy-zero">-</td>'; }
+    else {
+      const yoy = ((curYtd/prevYtd-1)*100);
+      const cls = yoy>0?'yoy-pos':yoy<0?'yoy-neg':'yoy-zero';
+      h += `<td class="${cls}">${yoy>0?'+':''}${yoy.toFixed(1)}%</td>`;
+    }
+  });
+  h += '</tr></tbody>';
+  table.innerHTML = h;
+}
+
+loadAllData();
+</script>
+</body>
+</html>
