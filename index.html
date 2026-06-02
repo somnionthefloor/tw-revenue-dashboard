@@ -46,11 +46,13 @@ select, .btn {
 }
 select:hover, .btn:hover { border-color: #4a5080; }
 select option { background: #1e2030; }
-optgroup { color: #6b7fff; font-style: normal; }
 .btn-primary { background: #4a5aff; border-color: #4a5aff; color: #fff; }
 .btn-primary:hover { background: #3a4aee; }
 .btn-danger { background: #dc2626; border-color: #dc2626; color: #fff; font-size: 11px; padding: 6px 10px; }
 .btn-danger:hover { background: #b91c1c; }
+.btn-notify { background: #d97706; border-color: #d97706; color: #fff; }
+.btn-notify:hover { background: #b45309; }
+.btn-notify.on { background: #16a34a; border-color: #16a34a; }
 .unit-toggle { display: flex; gap: 0; }
 .unit-toggle .btn { border-radius: 0; padding: 8px 14px; }
 .unit-toggle .btn:first-child { border-radius: 6px 0 0 6px; }
@@ -69,45 +71,44 @@ optgroup { color: #6b7fff; font-style: normal; }
   max-height: calc(100vh - 120px);
 }
 .sidebar .cat-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: #6b7fff;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 12px 16px 6px;
+  font-size: 11px; font-weight: 700; color: #6b7fff;
+  text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px 6px;
 }
 .sidebar .company-btn {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 8px 16px;
-  border: none;
-  background: none;
-  color: #b0b0b0;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; text-align: left; padding: 8px 16px;
+  border: none; background: none; color: #b0b0b0;
+  font-size: 13px; cursor: pointer; transition: background 0.15s;
 }
 .sidebar .company-btn:hover { background: #1e2030; color: #fff; }
 .sidebar .company-btn.active { background: #252940; color: #6b7fff; font-weight: 600; border-left: 3px solid #6b7fff; }
 .sidebar .company-btn .code { color: #666; font-size: 11px; margin-left: 4px; }
+.sidebar .company-btn .left { display: flex; align-items: center; gap: 6px; }
+.badge-new {
+  background: #ef4444; color: #fff; font-size: 9px; font-weight: 700;
+  padding: 2px 5px; border-radius: 8px; letter-spacing: 0.3px; white-space: nowrap;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+@keyframes pulse-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.watch-star {
+  cursor: pointer; font-size: 14px; opacity: 0.3; transition: opacity 0.15s;
+  flex-shrink: 0; padding: 0 2px;
+}
+.watch-star:hover { opacity: 0.7; }
+.watch-star.active { opacity: 1; color: #fbbf24; }
 .content { padding: 24px 32px; overflow-y: auto; max-height: calc(100vh - 120px); }
 .chart-container {
-  background: #1a1d2e;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  border: 1px solid #252940;
+  background: #1a1d2e; border-radius: 12px; padding: 24px;
+  margin-bottom: 24px; border: 1px solid #252940;
 }
 .chart-container h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #fff; }
 .chart-wrapper { position: relative; height: 400px; }
 .table-container {
-  background: #1a1d2e;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  border: 1px solid #252940;
-  overflow-x: auto;
+  background: #1a1d2e; border-radius: 12px; padding: 24px;
+  margin-bottom: 24px; border: 1px solid #252940; overflow-x: auto;
 }
 .table-container h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #fff; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -119,49 +120,59 @@ tr:hover td { background: #1e2030; }
 .yoy-neg { color: #f87171; }
 .yoy-zero { color: #888; }
 .summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 24px;
 }
 .summary-card {
-  background: #1a1d2e;
-  border-radius: 10px;
-  padding: 16px 20px;
-  border: 1px solid #252940;
+  background: #1a1d2e; border-radius: 10px; padding: 16px 20px; border: 1px solid #252940;
 }
 .summary-card .label { font-size: 12px; color: #888; margin-bottom: 4px; }
 .summary-card .value { font-size: 22px; font-weight: 700; color: #fff; }
 .summary-card .sub { font-size: 12px; margin-top: 4px; }
-
 .loading-overlay {
-  position: fixed; inset: 0;
-  background: rgba(15,17,23,0.95);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  z-index: 1000;
-  transition: opacity 0.3s;
+  position: fixed; inset: 0; background: rgba(15,17,23,0.95);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1000; transition: opacity 0.3s;
 }
 .loading-overlay.hidden { opacity: 0; pointer-events: none; }
-.loading-bar-bg {
-  width: 320px; height: 6px;
-  background: #1e2030; border-radius: 3px;
-  overflow: hidden; margin-top: 16px;
-}
-.loading-bar {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, #4a5aff, #6b7fff);
-  border-radius: 3px;
-  transition: width 0.3s;
-}
+.loading-bar-bg { width: 320px; height: 6px; background: #1e2030; border-radius: 3px; overflow: hidden; margin-top: 16px; }
+.loading-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #4a5aff, #6b7fff); border-radius: 3px; transition: width 0.3s; }
 .loading-text { color: #888; font-size: 14px; margin-top: 10px; }
 .loading-title { color: #fff; font-size: 18px; font-weight: 600; }
+
+/* Toast notification */
+.toast-container {
+  position: fixed; top: 20px; right: 20px; z-index: 2000;
+  display: flex; flex-direction: column; gap: 8px; max-width: 400px;
+}
+.toast {
+  background: #1a1d2e; border: 1px solid #4a5aff; border-radius: 10px;
+  padding: 16px 20px; color: #e0e0e0; font-size: 13px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: slide-in 0.3s ease-out;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.toast .toast-icon { font-size: 20px; flex-shrink: 0; }
+.toast .toast-body { flex: 1; }
+.toast .toast-title { font-weight: 600; color: #fff; margin-bottom: 4px; }
+.toast .toast-close {
+  background: none; border: none; color: #666; cursor: pointer;
+  font-size: 16px; padding: 0 4px; flex-shrink: 0;
+}
+.toast .toast-close:hover { color: #fff; }
+.toast-company { color: #6b7fff; cursor: pointer; }
+.toast-company:hover { text-decoration: underline; }
+@keyframes slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
 
 @media (max-width: 768px) {
   .main { grid-template-columns: 1fr; }
   .sidebar { max-height: none; display: flex; overflow-x: auto; padding: 8px; gap: 0; }
   .sidebar .cat-title { display: none; }
   .sidebar .company-btn { white-space: nowrap; padding: 6px 12px; }
+  .toast-container { left: 10px; right: 10px; }
 }
 </style>
 </head>
@@ -173,12 +184,15 @@ tr:hover td { background: #1e2030; }
   <div class="loading-text" id="loadingText">데이터 로딩 중...</div>
 </div>
 
+<div class="toast-container" id="toastContainer"></div>
+
 <div class="header">
   <div>
     <h1>대만 반도체 월매출 대시보드</h1>
     <div class="meta" id="lastUpdated"></div>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
+    <button class="btn btn-notify" id="notifyBtn" onclick="toggleNotifications()">🔔 알림 켜기</button>
     <button class="btn" onclick="refreshData()">새로고침</button>
     <button class="btn btn-danger" onclick="clearCache()">캐시 삭제</button>
   </div>
@@ -209,7 +223,10 @@ tr:hover td { background: #1e2030; }
 <script>
 const FINMIND_URL = 'https://api.finmindtrade.com/api/v4/data';
 const CACHE_KEY = 'tw_revenue_cache';
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+const SEEN_KEY = 'tw_revenue_seen';      // last-seen snapshot: {code: "YYYY-MM", ...}
+const WATCH_KEY = 'tw_revenue_watchlist'; // watchlist: ["2330","2454",...]
+const NOTIFY_KEY = 'tw_revenue_notify';   // notification enabled flag
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 const CATEGORIES = {
   "메모리": [
@@ -261,46 +278,146 @@ let unit = 'billion';
 let revenueChart = null;
 let yoyChart = null;
 let yearRange = null;
+let newDataCodes = new Set(); // companies with newly detected data
 
 const YEAR_COLORS = [
   '#6b7fff','#4ade80','#f59e0b','#f87171','#a78bfa',
   '#38bdf8','#fb923c','#e879f9','#34d399','#fbbf24',
 ];
 
-function getAllCompanies() {
-  const list = [];
-  for (const [cat, comps] of Object.entries(CATEGORIES)) {
-    for (const c of comps) list.push({...c, category: cat});
+// ── Watchlist ──
+function getWatchlist() {
+  try { return JSON.parse(localStorage.getItem(WATCH_KEY)) || []; } catch { return []; }
+}
+function setWatchlist(list) {
+  localStorage.setItem(WATCH_KEY, JSON.stringify(list));
+}
+function toggleWatch(code) {
+  const wl = getWatchlist();
+  const idx = wl.indexOf(code);
+  if (idx >= 0) wl.splice(idx, 1); else wl.push(code);
+  setWatchlist(wl);
+  renderSidebar();
+  if (currentCode) {
+    document.querySelectorAll('.company-btn').forEach(b => b.classList.toggle('active', b.dataset.code === currentCode));
   }
-  return list;
 }
 
-async function fetchCompany(code) {
+// ── Notifications ──
+function isNotifyEnabled() {
+  return localStorage.getItem(NOTIFY_KEY) === 'true';
+}
+
+async function toggleNotifications() {
+  if (isNotifyEnabled()) {
+    localStorage.setItem(NOTIFY_KEY, 'false');
+    updateNotifyBtn();
+    return;
+  }
+  if (!('Notification' in window)) {
+    alert('이 브라우저는 알림을 지원하지 않습니다.');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    localStorage.setItem(NOTIFY_KEY, 'true');
+    // Default watchlist: add key companies if watchlist is empty
+    if (getWatchlist().length === 0) {
+      setWatchlist(['2330','2454','2317','2382','6669']);
+      renderSidebar();
+    }
+    updateNotifyBtn();
+    showToast('🔔', '알림 활성화',
+      '워치리스트 기업의 월매출이 업데이트되면 알림을 보내드립니다. 사이드바의 ★로 기업을 추가/제거하세요.');
+  } else {
+    alert('알림 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.');
+  }
+}
+
+function updateNotifyBtn() {
+  const btn = document.getElementById('notifyBtn');
+  if (isNotifyEnabled()) {
+    btn.textContent = '🔔 알림 켜짐';
+    btn.classList.add('on');
+  } else {
+    btn.textContent = '🔔 알림 켜기';
+    btn.classList.remove('on');
+  }
+}
+
+function sendBrowserNotification(title, body) {
+  if (!isNotifyEnabled()) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    const n = new Notification(title, {
+      body,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📊</text></svg>',
+      tag: 'tw-revenue-update',
+    });
+    n.onclick = () => { window.focus(); n.close(); };
+  } catch {}
+}
+
+// ── Seen data tracking & new data detection ──
+function getSeenSnapshot() {
+  try { return JSON.parse(localStorage.getItem(SEEN_KEY)) || {}; } catch { return {}; }
+}
+function saveSeenSnapshot(data) {
+  const snapshot = {};
+  for (const [code, comp] of Object.entries(data.companies)) {
+    const years = Object.keys(comp.revenue || {}).map(Number).sort();
+    const lastYear = years[years.length - 1];
+    if (lastYear) {
+      const months = Object.keys(comp.revenue[lastYear]).map(Number);
+      const lastMonth = Math.max(...months);
+      snapshot[code] = `${lastYear}-${lastMonth}`;
+    }
+  }
+  localStorage.setItem(SEEN_KEY, JSON.stringify(snapshot));
+}
+
+function detectNewData(data) {
+  const oldSnap = getSeenSnapshot();
+  if (Object.keys(oldSnap).length === 0) return new Set(); // first visit
+
+  const updated = new Set();
+  for (const [code, comp] of Object.entries(data.companies)) {
+    const years = Object.keys(comp.revenue || {}).map(Number).sort();
+    const lastYear = years[years.length - 1];
+    if (!lastYear) continue;
+    const months = Object.keys(comp.revenue[lastYear]).map(Number);
+    const lastMonth = Math.max(...months);
+    const current = `${lastYear}-${lastMonth}`;
+    if (oldSnap[code] && oldSnap[code] !== current) {
+      updated.add(code);
+    }
+  }
+  return updated;
+}
+
+// ── Smart cache: also invalidate if new month likely available ──
+function shouldInvalidateCache(cached) {
   const now = new Date();
-  const start = `${now.getFullYear() - 5}-01-01`;
-  const end = `${now.getFullYear()}-12-31`;
-  const params = new URLSearchParams({
-    dataset: 'TaiwanStockMonthRevenue',
-    data_id: code,
-    start_date: start,
-    end_date: end,
-  });
-  const r = await fetch(`${FINMIND_URL}?${params}`);
-  const json = await r.json();
-  if (json.status === 200 && json.data) return json.data;
-  return [];
-}
+  const day = now.getDate();
 
-function transformRecords(records) {
-  const result = {};
-  for (const rec of records) {
-    const y = String(rec.revenue_year);
-    const m = String(rec.revenue_month);
-    const rev = Math.floor(rec.revenue / 1000); // NTD -> 千NTD
-    if (!result[y]) result[y] = {};
-    result[y][m] = rev;
+  // Between 1st-15th of month, check if we might be missing last month's data
+  if (day >= 1 && day <= 15) {
+    const expectedMonth = now.getMonth(); // 0-indexed, so this IS last month's month number (1-indexed)
+    const expectedYear = expectedMonth === 0 ? now.getFullYear() - 1 : now.getFullYear();
+    const expMonth = expectedMonth === 0 ? 12 : expectedMonth;
+
+    // Check a few key companies to see if they have the expected month
+    const keyCodes = ['2330', '2317', '2454'];
+    for (const code of keyCodes) {
+      const comp = cached.companies?.[code];
+      if (!comp) continue;
+      const yearData = comp.revenue?.[String(expectedYear)];
+      if (!yearData || !yearData[String(expMonth)]) {
+        return true; // missing expected data, should refresh
+      }
+    }
   }
-  return result;
+  return false;
 }
 
 function loadCache() {
@@ -308,7 +425,9 @@ function loadCache() {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const cached = JSON.parse(raw);
-    if (Date.now() - cached.timestamp > CACHE_TTL) return null;
+    const age = Date.now() - cached.timestamp;
+    if (age > CACHE_TTL) return null;
+    if (shouldInvalidateCache(cached.data)) return null;
     return cached.data;
   } catch { return null; }
 }
@@ -319,11 +438,58 @@ function saveCache(data) {
   } catch {}
 }
 
+// ── Toast ──
+function showToast(icon, title, message, duration = 8000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <div class="toast-icon">${icon}</div>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      <div>${message}</div>
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), duration);
+}
+
+// ── Core ──
+function getAllCompanies() {
+  const list = [];
+  for (const [cat, comps] of Object.entries(CATEGORIES))
+    for (const c of comps) list.push({...c, category: cat});
+  return list;
+}
+
+async function fetchCompany(code) {
+  const now = new Date();
+  const params = new URLSearchParams({
+    dataset: 'TaiwanStockMonthRevenue',
+    data_id: code,
+    start_date: `${now.getFullYear() - 5}-01-01`,
+    end_date: `${now.getFullYear()}-12-31`,
+  });
+  const r = await fetch(`${FINMIND_URL}?${params}`);
+  const json = await r.json();
+  return (json.status === 200 && json.data) ? json.data : [];
+}
+
+function transformRecords(records) {
+  const result = {};
+  for (const rec of records) {
+    const y = String(rec.revenue_year), m = String(rec.revenue_month);
+    if (!result[y]) result[y] = {};
+    result[y][m] = Math.floor(rec.revenue / 1000);
+  }
+  return result;
+}
+
 function clearCache() {
   localStorage.removeItem(CACHE_KEY);
   location.reload();
 }
-
 async function refreshData() {
   localStorage.removeItem(CACHE_KEY);
   await loadAllData(true);
@@ -339,6 +505,7 @@ async function loadAllData(force = false) {
     const cached = loadCache();
     if (cached) {
       DATA = cached;
+      newDataCodes = detectNewData(DATA);
       overlay.classList.add('hidden');
       onDataLoaded();
       return;
@@ -353,7 +520,7 @@ async function loadAllData(force = false) {
 
   for (let i = 0; i < total; i += batchSize) {
     const batch = companies.slice(i, i + batchSize);
-    const promises = batch.map(async (comp) => {
+    const results = await Promise.all(batch.map(async (comp) => {
       try {
         const records = await fetchCompany(comp.code);
         const revenue = transformRecords(records);
@@ -362,31 +529,31 @@ async function loadAllData(force = false) {
       } catch {
         return {code: comp.code, name: comp.name, category: comp.category, revenue: {}};
       }
-    });
-    const results = await Promise.all(promises);
+    }));
     for (const r of results) result[r.code] = {name: r.name, category: r.category, revenue: r.revenue};
-    const done = Math.min(i + batchSize, total);
-    bar.style.width = (done / total * 100) + '%';
-    text.textContent = `${done} / ${total} 기업 로딩 완료`;
+    bar.style.width = (Math.min(i+batchSize,total)/total*100)+'%';
+    text.textContent = `${Math.min(i+batchSize,total)} / ${total} 기업 로딩 완료`;
   }
 
-  const years = [...yearsSet].sort();
   DATA = {
     last_updated: new Date().toISOString(),
-    years,
+    years: [...yearsSet].sort(),
     companies: result,
     categories: Object.fromEntries(Object.entries(CATEGORIES).map(([k,v]) => [k, v.map(c=>c.code)])),
   };
 
+  // Detect new data BEFORE saving seen snapshot
+  newDataCodes = detectNewData(DATA);
+
   saveCache(DATA);
+  saveSeenSnapshot(DATA);
   overlay.classList.add('hidden');
   onDataLoaded();
 }
 
 function formatRevenue(val) {
   if (val == null) return '-';
-  if (unit === 'billion') return (val / 100000).toFixed(1);
-  return val.toLocaleString();
+  return unit === 'billion' ? (val/100000).toFixed(1) : val.toLocaleString();
 }
 function formatRevenueLabel() {
   return unit === 'billion' ? '억 NTD' : '천 NTD';
@@ -404,13 +571,38 @@ function onDataLoaded() {
   yearRange = [Math.min(...years), Math.max(...years)];
   const fromSel = document.getElementById('yearFrom');
   const toSel = document.getElementById('yearTo');
-  fromSel.innerHTML = '';
-  toSel.innerHTML = '';
+  fromSel.innerHTML = ''; toSel.innerHTML = '';
   years.forEach(y => { fromSel.add(new Option(y,y)); toSel.add(new Option(y,y)); });
-  fromSel.value = yearRange[0];
-  toSel.value = yearRange[1];
+  fromSel.value = yearRange[0]; toSel.value = yearRange[1];
+  updateNotifyBtn();
   renderSidebar();
   selectCompany(Object.keys(DATA.companies)[0]);
+
+  // Notify about new data
+  if (newDataCodes.size > 0) {
+    const watchlist = getWatchlist();
+    const watchedNew = [...newDataCodes].filter(c => watchlist.includes(c));
+    const names = [...newDataCodes].map(c => {
+      const comp = DATA.companies[c];
+      return `<span class="toast-company" onclick="selectCompany('${c}')">${comp?.name || c}</span>`;
+    });
+
+    if (names.length <= 5) {
+      showToast('🆕', `${newDataCodes.size}개 기업 월매출 업데이트`, names.join(', '), 12000);
+    } else {
+      showToast('🆕', `${newDataCodes.size}개 기업 월매출 업데이트`,
+        names.slice(0,5).join(', ') + ` 외 ${names.length-5}개`, 12000);
+    }
+
+    // Browser notification for watched companies
+    if (watchedNew.length > 0) {
+      const watchNames = watchedNew.map(c => DATA.companies[c]?.name || c);
+      sendBrowserNotification(
+        '📊 대만 월매출 업데이트',
+        `${watchNames.join(', ')}의 새 월매출 데이터가 공시되었습니다.`
+      );
+    }
+  }
 }
 
 function applyYearFilter() {
@@ -422,18 +614,33 @@ function applyYearFilter() {
 function renderSidebar() {
   const sidebar = document.getElementById('sidebar');
   sidebar.innerHTML = '';
+  const watchlist = getWatchlist();
+
   for (const [cat, codes] of Object.entries(DATA.categories)) {
     const title = document.createElement('div');
     title.className = 'cat-title';
     title.textContent = cat;
     sidebar.appendChild(title);
+
     for (const code of codes) {
       const comp = DATA.companies[code];
       if (!comp) continue;
       const btn = document.createElement('button');
       btn.className = 'company-btn';
       btn.dataset.code = code;
-      btn.innerHTML = `${comp.name} <span class="code">${code}</span>`;
+
+      const isNew = newDataCodes.has(code);
+      const isWatched = watchlist.includes(code);
+
+      btn.innerHTML = `
+        <div class="left">
+          ${isNew ? '<span class="badge-new">NEW</span>' : ''}
+          <span>${comp.name} <span class="code">${code}</span></span>
+        </div>
+        <span class="watch-star ${isWatched ? 'active' : ''}"
+              onclick="event.stopPropagation(); toggleWatch('${code}')"
+              title="워치리스트 ${isWatched ? '제거' : '추가'}">★</span>
+      `;
       btn.onclick = () => selectCompany(code);
       sidebar.appendChild(btn);
     }
@@ -475,7 +682,10 @@ function renderCompany(code) {
     if (prevYtd > 0) ytdYoY = ((latestTotal/prevYtd-1)*100);
   }
 
+  const isNew = newDataCodes.has(code);
+
   content.innerHTML = `
+    ${isNew ? '<div style="background:#1e3a2f;border:1px solid #16a34a;border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:13px;color:#4ade80;">🆕 이 기업의 월매출 데이터가 새로 업데이트되었습니다</div>' : ''}
     <div class="summary-grid">
       <div class="summary-card">
         <div class="label">최신월 매출 (${latestYear}/${lastMonth}월)</div>
@@ -531,8 +741,7 @@ function renderRevenueChart(comp,years,months) {
   const datasets = years.map((year,i) => {
     const data = months.map(m => {
       const val = comp.revenue[year]?.[m];
-      if (val==null) return null;
-      return unit==='billion' ? val/100000 : val;
+      return val==null ? null : (unit==='billion' ? val/100000 : val);
     });
     const isLatest = i===years.length-1;
     return {
@@ -567,10 +776,8 @@ function renderYoYChart(comp,years,months) {
   const datasets = yoyYears.map((year,i) => {
     const prevYear = year-1;
     const data = months.map(m => {
-      const cur = comp.revenue[year]?.[m];
-      const prev = comp.revenue[prevYear]?.[m];
-      if (cur==null||prev==null||prev===0) return null;
-      return ((cur/prev-1)*100);
+      const cur = comp.revenue[year]?.[m], prev = comp.revenue[prevYear]?.[m];
+      return (cur==null||prev==null||prev===0) ? null : ((cur/prev-1)*100);
     });
     const isLatest = i===yoyYears.length-1;
     return {
@@ -604,7 +811,7 @@ function renderRevenueTable(comp,years,months) {
   h += '</tr></thead><tbody>';
   months.forEach(m => {
     h += `<tr><td><strong>${m}월</strong></td>`;
-    years.forEach(y => { h+=`<td>${formatRevenue(comp.revenue[y]?.[m])}</td>`; });
+    years.forEach(y => h+=`<td>${formatRevenue(comp.revenue[y]?.[m])}</td>`);
     h += '</tr>';
   });
   h += '<tr style="border-top:2px solid #3a3d50;font-weight:700;"><td>합계</td>';
@@ -629,23 +836,21 @@ function renderYoYTable(comp,years,months) {
       if (cur==null||prev==null||prev===0) { h+='<td class="yoy-zero">-</td>'; }
       else {
         const yoy = ((cur/prev-1)*100);
-        const cls = yoy>0?'yoy-pos':yoy<0?'yoy-neg':'yoy-zero';
-        h += `<td class="${cls}">${yoy>0?'+':''}${yoy.toFixed(1)}%</td>`;
+        h += `<td class="${yoy>0?'yoy-pos':yoy<0?'yoy-neg':'yoy-zero'}">${yoy>0?'+':''}${yoy.toFixed(1)}%</td>`;
       }
     });
     h += '</tr>';
   });
   h += '<tr style="border-top:2px solid #3a3d50;font-weight:700;"><td>YTD</td>';
   yoyYears.forEach(y => {
-    const curMonths = Object.keys(comp.revenue[y]||{}).map(Number);
-    const lastM = curMonths.length>0 ? Math.max(...curMonths) : 0;
+    const ms = Object.keys(comp.revenue[y]||{}).map(Number);
+    const lastM = ms.length>0 ? Math.max(...ms) : 0;
     let curYtd=0, prevYtd=0;
     for (let m=1;m<=lastM;m++) { curYtd+=(comp.revenue[y]?.[m]||0); prevYtd+=(comp.revenue[y-1]?.[m]||0); }
-    if (prevYtd===0) { h+='<td class="yoy-zero">-</td>'; }
+    if (!prevYtd) { h+='<td class="yoy-zero">-</td>'; }
     else {
       const yoy = ((curYtd/prevYtd-1)*100);
-      const cls = yoy>0?'yoy-pos':yoy<0?'yoy-neg':'yoy-zero';
-      h += `<td class="${cls}">${yoy>0?'+':''}${yoy.toFixed(1)}%</td>`;
+      h += `<td class="${yoy>0?'yoy-pos':yoy<0?'yoy-neg':'yoy-zero'}">${yoy>0?'+':''}${yoy.toFixed(1)}%</td>`;
     }
   });
   h += '</tr></tbody>';
