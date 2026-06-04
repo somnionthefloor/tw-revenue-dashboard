@@ -78,6 +78,11 @@ COMPANIES = {
         {"code": "2327", "name": "Yageo"},
         {"code": "2492", "name": "Walsin"},
     ],
+    "레거시 팹리스": [
+        {"code": "3006", "name": "ESMT"},
+        {"code": "8271", "name": "AP Memory"},
+        {"code": "5351", "name": "Etron"},
+    ],
 }
 
 FINMIND_URL = "https://api.finmindtrade.com/api/v4/data"
