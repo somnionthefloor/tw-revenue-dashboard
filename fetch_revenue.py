@@ -78,6 +78,10 @@ COMPANIES = {
         {"code": "2327", "name": "Yageo"},
         {"code": "2492", "name": "Walsin"},
     ],
+    "전력/전원": [
+        {"code": "2308", "name": "Delta"},
+        {"code": "2301", "name": "Lite-On"},
+    ],
     "레거시 팹리스": [
         {"code": "3006", "name": "ESMT"},
         {"code": "8271", "name": "AP Memory"},
